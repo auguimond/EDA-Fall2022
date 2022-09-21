@@ -69,7 +69,7 @@ e <- TestScore<-c(99,88,94,50,74)#Vector2
 f <- PassingGrade<-c(TRUE,TRUE,TRUE,FALSE,TRUE)#Vector3
 TestGrades <- data.frame(d,e,f)#create data fram
 names(TestGrades) <- c("Name","Grade","Passing Grade")#rename columns
-View(TestGrades)#view test scores data frame
+#View(TestGrades)#view test scores data frame
 ```
 
 9.  QUESTION: How is this data frame different from a matrix?
