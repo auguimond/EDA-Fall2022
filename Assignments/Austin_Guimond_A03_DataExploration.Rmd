@@ -1,11 +1,9 @@
 ---
-title: 'Assignment 3: Data Exploration'
+title: "Assignment 3: Data Exploration"
 author: "Austin Guimond"
-output:
-  pdf_document: default
-  word_document: default
+output: pdf_document
 geometry: margin=2.54cm
-editor_options:
+editor_options: 
   chunk_output_type: inline
 ---
 
@@ -31,6 +29,7 @@ The completed exercise is due on Sept 30th.
 ```{r,  message = FALSE}
 Neonics <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv", stringsAsFactors = TRUE)
 #head(Neontics)
+
 Litter <- read.csv("./Data/Raw/NEON_NIWO_Litter_massdata_2018-08_raw.csv",stringsAsFactors = TRUE)
 #head(Litter)
 ```
@@ -119,7 +118,6 @@ class(Neonics$Conc.1..Author.)
 9.  Using `geom_freqpoly`, generate a plot of the number of studies conducted by publication year.
 
 ```{r}
-library(ggplot2)
 #plot publications per year
 ggplot(Neonics) + geom_freqpoly(aes(x= Publication.Year), bins = 37)
 ```
