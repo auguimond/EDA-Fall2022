@@ -35,7 +35,7 @@ The completed exercise is due on Friday, Oct7th @ 5:00pm.
 
 ```{r, message = FALSE}
 #1
-install.packages("lubridate") 
+#install.packages("lubridate") 
 library(lubridate)
 library(tidyverse)
 library(dplyr)
@@ -85,35 +85,35 @@ dim(Air.PM25.2019)
 
 ```{r}
 #3
-Air.O3.2018$Date <- as.Date(Air.O3.2018$Date, format = "%m/%d/%y")
+Air.O3.2018$Date <- as.Date(Air.O3.2018$Date, format = "%m/%d/%Y")
 class(Air.O3.2018$Date)
 
-Air.O3.2019$Date <- as.Date(Air.O3.2019$Date, format = "%m/%d/%y")
+Air.O3.2019$Date <- as.Date(Air.O3.2019$Date, format = "%m/%d/%Y")
 class(Air.O3.2019$Date)
 
-Air.PM25.2018$Date <- as.Date(Air.PM25.2018$Date, format = "%m/%d/%y")
+Air.PM25.2018$Date <- as.Date(Air.PM25.2018$Date, format = "%m/%d/%Y")
 class(Air.PM25.2018$Date)
 
-Air.PM25.2019$Date <- as.Date(Air.PM25.2019$Date, format = "%m/%d/%y")
+Air.PM25.2019$Date <- as.Date(Air.PM25.2019$Date, format = "%m/%d/%Y")
 class(Air.PM25.2019$Date)
 
 #4
 Air.O3.2018.Select <- select(Air.O3.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+colnames(Air.O3.2018.Select)
 
 Air.O3.2019.Select <- select(Air.O3.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+colnames(Air.O3.2019.Select)
 
 Air.PM25.2018.Select <- select(Air.PM25.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+colnames(Air.PM25.2018.Select)
 
 Air.PM25.2019.Select <- select(Air.PM25.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 
 #5
 class(Air.PM25.2018.Select$AQS_PARAMETER_DESC)
+Air.PM25.2018.Select$AQS_PARAMETER_DESC <- "PM2.5"
+Air.PM25.2019.Select$AQS_PARAMETER_DESC <- "PM2.5"
 
-levels(Air.PM25.2018.Select$AQS_PARAMETER_DESC)[levels(Air.PM25.2018.Select$AQS_PARAMETER_DESC) == "Acceptable PM2.5 AQI & Speciation Mass"] <- "PM2.5"
-levels(Air.PM25.2018.Select$AQS_PARAMETER_DESC)[levels(Air.PM25.2018.Select$AQS_PARAMETER_DESC) == "PM2.5 - Local Conditions"] <- "PM2.5"
-
-levels(Air.PM25.2019.Select$AQS_PARAMETER_DESC)[levels(Air.PM25.2019.Select$AQS_PARAMETER_DESC) == "Acceptable PM2.5 AQI & Speciation Mass"] <- "PM2.5"
-levels(Air.PM25.2019.Select$AQS_PARAMETER_DESC)[levels(Air.PM25.2019.Select$AQS_PARAMETER_DESC) == "PM2.5 - Local Conditions"] <- "PM2.5"
 
 #6
 write.csv(Air.O3.2018.Select, row.names = FALSE, file = "./Data/Processed/EPAair_O3_NC2018_Processed.csv")
@@ -140,29 +140,30 @@ write.csv(Air.PM25.2019.Select, row.names = FALSE, file = "./Data/Processed/EPAa
 
 ```{r}
 #7
-EPA.O3.2018 <- read.csv("./Data/Processed/EPAair_O3_NC2018_Processed.csv", stringsAsFactors = TRUE)
-EPA.O3.2019 <- read.csv("./Data/Processed/EPAair_O3_NC2019_Processed.csv", stringsAsFactors = TRUE)
-EPA.PM25.2018 <- read.csv("./Data/Processed/EPAair_PM25_NC2018_Processed.csv", stringsAsFactors = TRUE)
-EPA.PM25.2019 <- read.csv("./Data/Processed/EPAair_PM25_NC2019_Processed.csv", stringsAsFactors = TRUE)
-
-EPAair.All.New <- rbind(EPA.O3.2018, EPA.O3.2019, EPA.PM25.2018, EPA.PM25.2019)
+EPAair.All.New <- rbind(Air.PM25.2018.Select, Air.PM25.2019.Select, Air.O3.2018.Select, Air.O3.2019.Select)
 dim(EPAair.All.New)
 
 #8
 EPAair.Wrangle.Update <- filter(EPAair.All.New, Site.Name == "Linville Falls" | 
 Site.Name == "Durham Armory" | Site.Name == "Leggett" | Site.Name == "Hattie Avenue" | Site.Name == "Clemmons Middle" | Site.Name == "Mendenhall School" | Site.Name == "Frying Pan Mountain" | Site.Name == "West Johnston Co." | Site.Name == "Garinger High School" | Site.Name == "Castle Hayne" | Site.Name == "Pitt Agri. Center" | Site.Name == "Bryson City" | Site.Name == "Millbrook School") %>%
 group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>%
-summarise(meanAQI = mean(DAILY_AQI_VALUE),
+dplyr::summarise(meanAQI = mean(DAILY_AQI_VALUE),
           meanLat = mean(SITE_LATITUDE), 
           meanLong = mean(SITE_LONGITUDE)) %>%
-mutate(month = month (Date)) %>%  
-mutate(year = year (Date))
+mutate(month = month(Date)) %>%  
+mutate(year = year(Date))
+
+dim(EPAair.Wrangle.Update)
+unique(EPAair.Wrangle.Update$Site.Name)
 
 #9
+EPAair.Spread <- pivot_wider(EPAair.Wrangle.Update, names_from = AQS_PARAMETER_DESC, values_from = meanAQI)
 
 #10
+dim(EPAair.Spread)
 
 #11
+write.csv(EPAair.Spread, row.names = FALSE, file = "./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv.csv")
 
 ```
 
@@ -174,10 +175,15 @@ mutate(year = year (Date))
 
 ```{r}
 #12a
+EPAair.Summary <- group_by(EPAair.Spread, Site.Name, month, year) %>%
+summarise(meanPM2.5 = mean(PM2.5),
+meanOzone = mean(Ozone)) %>%
+drop_na(meanPM2.5, meanOzone)
 
 #12b
 
 #13
+dim(EPAair.Summary)
 
 ```
 

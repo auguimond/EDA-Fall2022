@@ -4,7 +4,7 @@ author: "Austin Guimond"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -35,11 +35,12 @@ The completed exercise is due on Friday, Oct7th @ 5:00pm.
 
 ```{r, message = FALSE}
 #1
-install.packages("lubridate") 
-library(lubridate)
-library(tidyverse)
-library(dplyr)
+#install.packages("lubridate") 
+#library(lubridate)
+#library(tidyverse)
+#library(dplyr)
 
+#import EPA datasets
 Air.O3.2018 <- read.csv("~/R/EDA-Fall2022/Data/Raw/EPAair_O3_NC2018_raw.csv", stringsAsFactors = TRUE)
 Air.O3.2019 <- read.csv("~/R/EDA-Fall2022/Data/Raw/EPAair_O3_NC2019_raw.csv", stringsAsFactors = TRUE)
 Air.PM25.2018 <- read.csv("~/R/EDA-Fall2022/Data/Raw/EPAair_PM25_NC2018_raw.csv", stringsAsFactors = TRUE)
@@ -85,37 +86,41 @@ dim(Air.PM25.2019)
 
 ```{r}
 #3
-Air.O3.2018$Date <- as.Date(Air.O3.2018$Date, format = "%m/%d/%y")
+#Change class of date column to date
+Air.O3.2018$Date <- as.Date(Air.O3.2018$Date, format = "%m/%d/%Y")
 class(Air.O3.2018$Date)
 
-Air.O3.2019$Date <- as.Date(Air.O3.2019$Date, format = "%m/%d/%y")
+Air.O3.2019$Date <- as.Date(Air.O3.2019$Date, format = "%m/%d/%Y")
 class(Air.O3.2019$Date)
 
-Air.PM25.2018$Date <- as.Date(Air.PM25.2018$Date, format = "%m/%d/%y")
+Air.PM25.2018$Date <- as.Date(Air.PM25.2018$Date, format = "%m/%d/%Y")
 class(Air.PM25.2018$Date)
 
-Air.PM25.2019$Date <- as.Date(Air.PM25.2019$Date, format = "%m/%d/%y")
+Air.PM25.2019$Date <- as.Date(Air.PM25.2019$Date, format = "%m/%d/%Y")
 class(Air.PM25.2019$Date)
 
 #4
+#Select columns from the original dataset
 Air.O3.2018.Select <- select(Air.O3.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+colnames(Air.O3.2018.Select)
 
 Air.O3.2019.Select <- select(Air.O3.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+colnames(Air.O3.2019.Select)
 
 Air.PM25.2018.Select <- select(Air.PM25.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+colnames(Air.PM25.2018.Select)
 
 Air.PM25.2019.Select <- select(Air.PM25.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 
 #5
+#Change all AQS parameter data to PM2.5
 class(Air.PM25.2018.Select$AQS_PARAMETER_DESC)
+Air.PM25.2018.Select$AQS_PARAMETER_DESC <- "PM2.5"
+Air.PM25.2019.Select$AQS_PARAMETER_DESC <- "PM2.5"
 
-levels(Air.PM25.2018.Select$AQS_PARAMETER_DESC)[levels(Air.PM25.2018.Select$AQS_PARAMETER_DESC) == "Acceptable PM2.5 AQI & Speciation Mass"] <- "PM2.5"
-levels(Air.PM25.2018.Select$AQS_PARAMETER_DESC)[levels(Air.PM25.2018.Select$AQS_PARAMETER_DESC) == "PM2.5 - Local Conditions"] <- "PM2.5"
-
-levels(Air.PM25.2019.Select$AQS_PARAMETER_DESC)[levels(Air.PM25.2019.Select$AQS_PARAMETER_DESC) == "Acceptable PM2.5 AQI & Speciation Mass"] <- "PM2.5"
-levels(Air.PM25.2019.Select$AQS_PARAMETER_DESC)[levels(Air.PM25.2019.Select$AQS_PARAMETER_DESC) == "PM2.5 - Local Conditions"] <- "PM2.5"
 
 #6
+#Write new .csv files
 write.csv(Air.O3.2018.Select, row.names = FALSE, file = "./Data/Processed/EPAair_O3_NC2018_Processed.csv")
 write.csv(Air.O3.2019.Select, row.names = FALSE, file = "./Data/Processed/EPAair_O3_NC2019_Processed.csv")
 
@@ -140,29 +145,36 @@ write.csv(Air.PM25.2019.Select, row.names = FALSE, file = "./Data/Processed/EPAa
 
 ```{r}
 #7
-EPA.O3.2018 <- read.csv("./Data/Processed/EPAair_O3_NC2018_Processed.csv", stringsAsFactors = TRUE)
-EPA.O3.2019 <- read.csv("./Data/Processed/EPAair_O3_NC2019_Processed.csv", stringsAsFactors = TRUE)
-EPA.PM25.2018 <- read.csv("./Data/Processed/EPAair_PM25_NC2018_Processed.csv", stringsAsFactors = TRUE)
-EPA.PM25.2019 <- read.csv("./Data/Processed/EPAair_PM25_NC2019_Processed.csv", stringsAsFactors = TRUE)
-
-EPAair.All.New <- rbind(EPA.O3.2018, EPA.O3.2019, EPA.PM25.2018, EPA.PM25.2019)
+#Combine EPA datasets
+EPAair.All.New <- rbind(Air.PM25.2018.Select, Air.PM25.2019.Select, Air.O3.2018.Select, Air.O3.2019.Select)
 dim(EPAair.All.New)
 
 #8
+#Pipe to filter for desired sites + calculated mean for AQI, Lat, and Long
+#add month and year column 
 EPAair.Wrangle.Update <- filter(EPAair.All.New, Site.Name == "Linville Falls" | 
 Site.Name == "Durham Armory" | Site.Name == "Leggett" | Site.Name == "Hattie Avenue" | Site.Name == "Clemmons Middle" | Site.Name == "Mendenhall School" | Site.Name == "Frying Pan Mountain" | Site.Name == "West Johnston Co." | Site.Name == "Garinger High School" | Site.Name == "Castle Hayne" | Site.Name == "Pitt Agri. Center" | Site.Name == "Bryson City" | Site.Name == "Millbrook School") %>%
 group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>%
-summarise(meanAQI = mean(DAILY_AQI_VALUE),
+dplyr::summarise(meanAQI = mean(DAILY_AQI_VALUE),
           meanLat = mean(SITE_LATITUDE), 
           meanLong = mean(SITE_LONGITUDE)) %>%
-mutate(month = month (Date)) %>%  
-mutate(year = year (Date))
+mutate(month = month(Date)) %>%  
+mutate(year = year(Date))
+
+dim(EPAair.Wrangle.Update)
+unique(EPAair.Wrangle.Update$Site.Name)
 
 #9
+#spread PM2.5 and Ozone data to new columns
+EPAair.Spread <- pivot_wider(EPAair.Wrangle.Update, names_from = AQS_PARAMETER_DESC, values_from = meanAQI)
 
 #10
+#find dimensions
+dim(EPAair.Spread)
 
 #11
+#Write new .csv
+write.csv(EPAair.Spread, row.names = FALSE, file = "./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv.csv")
 
 ```
 
@@ -173,14 +185,18 @@ mutate(year = year (Date))
 13. Call up the dimensions of the summary dataset.
 
 ```{r}
-#12a
-
-#12b
+#12
+#Create full summary data set
+EPAair.Summary <- group_by(EPAair.Spread, Site.Name, month, year) %>%
+summarise(meanPM2.5 = mean(PM2.5),
+meanOzone = mean(Ozone)) %>%
+drop_na(meanPM2.5, meanOzone)
 
 #13
+#Find summary dimensions 
+dim(EPAair.Summary)
 
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
-
-> Answer: 
+> Answer: Na.omit calculates values in a column while omitting any NA values from the calculations. Drop_na removes all instances of NA from a columm. Calculations are comopleted once all NA have been dropped. Na.omit essentially ignores NA values while drop_na removes any insatnces of NA from the data. In our dataset, we wanted to remove all NA values and not just have them be ignored. 
