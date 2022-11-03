@@ -106,7 +106,7 @@ O3.twosample <- t.test(EPAair$Ozone ~ EPAair$Year)
 O3.twosample
 
 # Format as a GLM
-O3.twosample2 <- lm(EPAair$Ozone ~ EPAair$Year)
+twosample2 <- lm($Ozone ~ EPAair$Year)
 summary(O3.twosample2)
 
 ```
