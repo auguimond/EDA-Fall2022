@@ -246,13 +246,18 @@ ggplot() +
 
 ```{r}
 #Compute HUC8 wind energy
-
+wind_energy_huc8 <- read.csv('https://raw.githubusercontent.com/ENV859/EnviroAtlasData/main/Wind_Energy.csv', colClasses = c('Huc_12' = 'factor')) %>%
+  mutate(HUC_8=substr(HUC_12,1,8)) %>%
+  group_by(HUC_8) %>%
+  summarize(kWhkm2day = sum(kWhkm2day))
 
 
 
 
   
 #Join to HUC_8 features
+huc8_sf_wind <- huc8_sf %>%
+  left_join(wind_energy_huc8, by = c ('HUC_8', 'HUC_8'))
 
 
 

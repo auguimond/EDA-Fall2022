@@ -38,6 +38,8 @@ library(sf)
 library(leaflet)
 #install.packages('mapview')
 library(mapview)
+library(tidyverse)
+library(lubridate)
 
 #Disable on-the-fly projections
 sf::sf_use_s2(FALSE)
@@ -87,6 +89,7 @@ str(GasPlants$geometry)
 plot(GasPlants['status'],pch=16)
 
 #View using ggplot
+library(ggplot2)
 ggplot(data=GasPlants) + geom_sf()
 
 #View using mapview
@@ -100,7 +103,7 @@ mapview(GasPlants)
 ```{r Create a spatial dataframe from coordinate data}
 
 #Read in our processed EPA Air dataset, setting the Date column to be dates
-EPAair <- read.csv("./Data/Processed/EPAair_O3_PM25_NC2021_Processed.csv", stringsAsFactors = TRUE) %>% 
+EPAair <- read.csv("~/R/EDA-Fall2022/Data/Processed/EPAair_O3_PM25_NC2021_Processed.csv", stringsAsFactors = TRUE) %>% 
   mutate(Date = ymd(Date))
 
 #Wrangle so each site has only one record, computing mean ozone and PM2.5 at that site
